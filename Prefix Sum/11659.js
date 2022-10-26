@@ -6,14 +6,14 @@ const N = Number(input[0].split(" ")[0]); // 수의 개수
 const M = Number(input[0].split(" ")[1]); // 반복 횟수
 const arr = input[1].split(" "); // 수 배열
 
-const test = input.slice(2);
-// 반복문 안에서 test[i].split(" ")
+const test = input.slice(2); // 구간
 
-const P = [0];
 // Prefix Sum 배열 만들기
+const P = [0];
 for (let i = 1; i < N + 1; i++) {
   P[i] = P[i - 1] + Number(arr[i - 1]);
 }
+console.log(P);
 
 // 반복문 안에서 console.log()를 쓰면 시간초과가 발생
 // 정답 배열을 하나 만들어두어야 함
