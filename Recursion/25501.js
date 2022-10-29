@@ -24,7 +24,7 @@ function isPalindrome(str) {
 
 let answer = [];
 for (let i = 1; i < T + 1; i++) {
-  answer.push(`${isPalindrome(input[i])}`);
+  answer.push(isPalindrome(input[i]));
 }
 
 console.log(answer.join("\n"));
