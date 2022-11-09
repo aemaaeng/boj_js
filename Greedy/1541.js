@@ -27,5 +27,5 @@ console.log(computeMinimum(input));
 // numbers[0] + numbers[0] - numbers[0] - numbers[1] - numbers[2]
 // numbers[0] - numbers[1] - numbers[2]
 
-// Array.prototype.split()
+// String.prototype.split()
 // separator가 생략되거나 str에 등장하지 않을 경우, 반환되는 배열은 원본 문자열을 유일한 원소로 가집니다. (출처: mdn)
