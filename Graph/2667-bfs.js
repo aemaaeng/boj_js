@@ -5,56 +5,65 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
 // 1 = 집이 있는 곳, 0 = 집이 없는 곳
 // 단지별 번호 붙이기, 각 단지에 속하는 집의 수를 오름차순으로 정렬하기
-
 const N = Number(input.shift());
 const map = input.map((el) => el.split("").map(Number));
 
-// 첫 번째 줄: 총 단지 수
-// 각 단지 내 집의 수를 오름차순으로 정렬
+// 단지 수, 단지 수를 담는 배열
+const answer = [];
+let cnt = 1;
+
+// 방문 여부 확인
+const visited = Array.from(new Array(N + 1), () =>
+  new Array(N + 1).fill(false)
+);
+
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
+
+// 단지 수를 세는 bfs
 function bfs(x, y) {
   const queue = [[x, y]];
-  const visited = {};
-  visited[[x, y]] = 1;
-  visitedCoords[[x, y]] = 1;
-  let dx = [0, 0, -1, 1];
-  let dy = [-1, 1, 0, 0];
-  let cnt = 1;
+  visited[x][y] = true;
+  visitedCoords[[x, y]] = true;
 
   while (queue.length) {
-    for (let i = 0; i < queue.length; i++) {
-      let coord = queue.shift();
-      for (let j = 0; j < 4; j++) {
-        let nx = coord[0] + dx[j];
-        let ny = coord[1] + dy[j];
+    let coord = queue.shift();
+    for (let i = 0; i < 4; i++) {
+      let nx = coord[0] + dx[i];
+      let ny = coord[1] + dy[i];
 
-        if (
-          nx >= 0 &&
-          ny >= 0 &&
-          nx < N &&
-          ny < N &&
-          !visited[[nx, ny]] &&
-          map[nx][ny] === 1
-        ) {
-          visited[[nx, ny]] = 1;
-          visitedCoords[[nx, ny]] = 1;
-          cnt++;
-          queue.push([nx, ny]);
-        }
+      // 범위를 벗어나지 않고 방문하지 않았으며 1이라면 단지 수에 1 더하기
+      if (
+        nx >= 0 &&
+        ny >= 0 &&
+        nx < N &&
+        ny < N &&
+        !visited[nx][ny] &&
+        map[nx][ny] === 1
+      ) {
+        queue.push([nx, ny]);
+        visited[nx][ny] = true;
+        visitedCoords[[nx, ny]] = true;
+        cnt++;
       }
     }
   }
+
   return cnt;
 }
 
-// 이미 방문한 곳을 중복으로 가지 않기 위함
+// 이중 반복문으로 bfs 돌리기 + answer 배열에 push
 const visitedCoords = {};
-const answer = []; // bfs를 수행해 각 단지별 집 수를 담을 배열
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
-    if (map[i][j] === 1 && !visitedCoords[[i, j]]) answer.push(bfs(i, j));
+    if (!visitedCoords[[i, j]] && map[i][j] === 1) {
+      answer.push(bfs(i, j));
+      cnt = 1;
+    }
   }
 }
 
+// 답 출력
 console.log(answer.length);
 answer.sort((a, b) => a - b);
 console.log(answer.join("\n"));
