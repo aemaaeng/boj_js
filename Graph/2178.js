@@ -3,35 +3,30 @@ const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
-const [N, M] = input.shift().split(" ").map(Number);
-const maze = input.map((row) => row.split("").map(Number));
+const [N, M] = input[0].split(" ").map(Number);
+const maze = input.slice(1).map((el) => el.split("").map(Number));
 
 function bfs(x, y) {
   const queue = [[x, y]];
   const result = [];
   const visited = {};
   visited[[x, y]] = 1;
-  let dx = [0, 0, -1, 1];
-  let dy = [-1, 1, 0, 0];
+  const dx = [0, 0, -1, 1];
+  const dy = [-1, 1, 0, 0];
   while (queue.length) {
-    for (let i = 0; i < queue.length; i++) {
-      let coord = queue.shift(); // 좌표
-      result.push(coord);
-      for (let j = 0; j < 4; j++) {
-        let nx = coord[0] + dx[j];
-        let ny = coord[1] + dy[j];
+    let coord = queue.shift();
+    result.push(coord);
+    for (let i = 0; i < 4; i++) {
+      const nx = coord[0] + dx[i];
+      const ny = coord[1] + dy[i];
 
-        if (
-          nx >= 0 &&
-          ny >= 0 &&
-          nx < N &&
-          ny < M &&
-          !visited[[nx, ny]] &&
-          maze[nx][ny] === 1
-        ) {
-          visited[[nx, ny]] = visited[coord] + 1;
-          queue.push([nx, ny]);
-        }
+      // 정해진 범위에 벗어나는지 확인하기
+      if (nx < 0 || ny < 0 || nx >= N || ny >= M) continue;
+
+      if (!visited[[nx, ny]] && maze[nx][ny] === 1) {
+        // 방문하지 않은 곳이고 1이면 queue에 넣기
+        visited[[nx, ny]] = visited[coord] + 1;
+        queue.push([nx, ny]);
       }
     }
   }
