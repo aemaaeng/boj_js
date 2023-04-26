@@ -1,35 +1,34 @@
 // 좋은 수열
 const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
-let N = Number(fs.readFileSync(filePath).toString());
+let N = Number(fs.readFileSync(filePath).toString().trim());
 
-let isDone = false;
+const answer = [];
 
-function backtracking(str) {
-  if (isDone) return;
-
-  if (str.length === N) {
-    console.log(str);
-    isDone = true;
-    return;
-  }
-
-  for (let i = 1; i < 4; i++) {
-    const temp = str + `${i}`;
-    if (temp.length <= N && isGood(temp)) backtracking(temp);
-  }
-}
-
-function isGood(str) {
-  const M = str.length;
-  const half = Math.floor(M / 2);
-  for (let i = 1; i <= half; i++) {
-    const A = M;
-    const B = M - i;
-    const C = M - i * 2;
-    if (C >= 0 && str.substring(B, A) === str.substring(C, B)) return false;
+function isGoodSequence(str) {
+  for (let i = 0; i < str.length; i++) {
+    for (let j = i + 1; j < str.length + 1; j++) {
+      // i부터 j까지의 부분 문자열
+      let tmp = str.substring(i, j);
+      if (str.startsWith(tmp, j)) return false;
+    }
   }
   return true;
 }
 
-backtracking("1");
+function backtracking(cnt, sequence) {
+  if (cnt === N) {
+    let str = sequence.join("");
+    if (isGoodSequence(str)) answer.push(Number(str));
+    sequence = "";
+  } else {
+    for (let i = 1; i <= 3; i++) {
+      sequence.push(i);
+      backtracking(cnt + 1, sequence);
+      sequence.pop(i);
+    }
+  }
+}
+
+backtracking(0, []);
+console.log(Math.min(...answer));
