@@ -1,26 +1,38 @@
+// 구간합 구하기 5
 const fs = require("fs");
-// TODO: 제출 시 경로 변환 필수 ("/dev/stdin")
-const input = fs.readFileSync("test.txt").toString().trim().split("\n");
+const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
+let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
-const N = Number(input[0].split(" ")[0]); // 표의 크기
-const M = Number(input[0].split(" ")[1]); // 합을 구해야 하는 횟수
+const [N, M] = input[0].split(" ").map(Number);
+const board = input.slice(1, N + 1).map((el) => el.split(" ").map(Number));
 
-const board = input.slice(1, N + 1).map((str) => str.split(" ").map(Number));
+const P = Array.from(new Array(N + 1), () => new Array(N + 1).fill(0));
 
-// 누적합 배열
-let P = Array.from(Array(N + 1), () => new Array(N + 1).fill(0));
+// console.log(N, M);
+// console.log(board);
 
+// 누적합 만들기
 for (let i = 1; i < P.length; i++) {
   for (let j = 1; j < P.length; j++) {
-    // P[0][1] =
     P[i][j] = board[i - 1][j - 1] + P[i][j - 1] + P[i - 1][j] - P[i - 1][j - 1];
   }
 }
 
-// 이제 구하면 됨
-let answer = [];
-for (let i = N + 1; i < input.length; i++) {
-  const [x1, y1, x2, y2] = input[i].split(" ").map(Number);
+// console.log(P);
+
+// [
+//   [ 0, 0, 0, 0, 0 ],
+//   [ 0, 1, 3, 6, 10 ],
+//   [ 0, 3, 8, 15, 24 ],
+//   [ 0, 6, 15, 27, 42 ],
+//   [ 0, 10, 24, 42, 64 ]
+// ]
+
+const answer = [];
+const coords = input.slice(N + 1);
+coords.forEach((coord) => {
+  const [x1, y1, x2, y2] = coord.split(" ").map(Number);
   answer.push(P[x2][y2] - (P[x1 - 1][y2] + P[x2][y1 - 1]) + P[x1 - 1][y1 - 1]);
-}
+});
+
 console.log(answer.join("\n"));
