@@ -3,85 +3,83 @@ const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
-// 적록색약이 아닌 사람 (세 영역을 구분)
-// 적록색약인 사람 (빨강-초록을 하나로 묶음)
+const N = Number(input[0]);
+const arr = input.slice(1).map((el) => el.split(""));
 
-const N = Number(input.shift());
-const grid = input.map((el) => el.split(""));
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
 
-const dx = [0, 0, 1, -1];
-const dy = [1, -1, 0, 0];
-let cnt = 0;
+const answer1 = [];
+const answer2 = [];
 
-let visited = Array.from(new Array(N + 1), () => new Array(N + 1).fill(false));
+let visitedCoords = {};
+let area = 0;
 
-function dfs_blind(x, y) {
-  if (visited[x][y]) return;
-  visited[x][y] = true;
-  visitedCoords_blind[[x, y]] = true;
-  cnt++;
-
-  for (let i = 0; i < 4; i++) {
-    let nx = x + dx[i];
-    let ny = y + dy[i];
-
-    if (nx >= 0 && ny >= 0 && nx < N && ny < N) {
-      if (
-        grid[nx][ny] === grid[x][y] ||
-        (grid[x][y] === "R" && grid[nx][ny] === "G") ||
-        (grid[x][y] === "G" && grid[nx][ny] === "R")
-      ) {
-        dfs_blind(nx, ny);
-      }
-    }
-  }
-
-  return cnt;
-}
-
-function dfs(x, y) {
-  if (visited[x][y]) return;
-  visited[x][y] = true;
+// dfs로 영역 개수 세기 (색약 X)
+function dfs1(x, y) {
+  if (visitedCoords[[x, y]]) return;
   visitedCoords[[x, y]] = true;
-  cnt++;
+  area += 1;
 
+  // 주변 탐색
   for (let i = 0; i < 4; i++) {
-    let nx = x + dx[i];
-    let ny = y + dy[i];
+    const nx = x + dx[i];
+    const ny = y + dy[i];
 
-    if (nx >= 0 && ny >= 0 && nx < N && ny < N && grid[nx][ny] === grid[x][y]) {
-      dfs(nx, ny);
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+    if (arr[x][y] === arr[nx][ny]) {
+      dfs1(nx, ny);
     }
   }
 
-  return cnt;
+  return area;
 }
 
-const non_blind = [];
-const blind = [];
+function dfs2(x, y) {
+  if (visitedCoords[[x, y]]) return;
+  visitedCoords[[x, y]] = true;
+  area += 1;
 
-const visitedCoords = {};
+  // 주변 탐색
+  for (let i = 0; i < 4; i++) {
+    const nx = x + dx[i];
+    const ny = y + dy[i];
 
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+
+    // R과 G를 같은 취급해야 함.
+    if (
+      (arr[x][y] === "G" && arr[nx][ny] === "R") ||
+      (arr[x][y] === "R" && arr[nx][ny] === "G") ||
+      arr[x][y] === arr[nx][ny]
+    ) {
+      dfs2(nx, ny);
+    }
+  }
+
+  return area;
+}
+
+// 반복문으로 탐색 - 일반
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
     if (!visitedCoords[[i, j]]) {
-      non_blind.push(dfs(i, j));
-      cnt = 0;
+      answer1.push(dfs1(i, j));
+      area = 0;
     }
   }
 }
 
-const visitedCoords_blind = {};
-cnt = 0;
-visited = Array.from(new Array(N + 1), () => new Array(N + 1).fill(false));
+visitedCoords = {};
 
+// 반복문으로 탐색 - 적록색약
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
-    if (!visitedCoords_blind[[i, j]]) {
-      blind.push(dfs_blind(i, j));
-      cnt = 0;
+    if (!visitedCoords[[i, j]]) {
+      answer2.push(dfs2(i, j));
+      area = 0;
     }
   }
 }
 
-console.log(non_blind.length, blind.length);
+console.log(`${answer1.length} ${answer2.length}`);
