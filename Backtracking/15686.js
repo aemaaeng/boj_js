@@ -5,45 +5,48 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
 const [N, M] = input[0].split(" ").map(Number);
 const city = input.slice(1).map((el) => el.split(" ").map(Number));
-const house = [];
+
+// 집의 위치와 치킨집의 위치 저장
+const houses = [];
 const chicken = [];
 
-// 집과 치킨집의 좌표 저장
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
-    if (city[i][j] === 1) house.push([i, j]);
+    if (city[i][j] === 1) houses.push([i, j]);
     if (city[i][j] === 2) chicken.push([i, j]);
   }
 }
 
-let answer = Infinity;
+let min = Infinity;
 const check = new Array(chicken.length).fill(false);
 
-// 도시의 치킨 거리를 세는 함수
-function minDistance() {
-  let sum = 0;
-  // 집별로 각 치킨집과의 거리를 세서 그 최솟값을 sum에 더한다
-  house.forEach(([hx, hy]) => {
+// 도시의 치킨 거리를 구하는 함수
+function chickenDistance() {
+  let distance = 0;
+  // 집에서 각 치킨집까지의 거리를 전부 구함
+  for (let i = 0; i < houses.length; i++) {
     let min = Infinity;
-    chicken.forEach((_, idx) => {
-      if (check[idx] === true) {
-        const [cx, cy] = chicken[idx];
-        min = Math.min(min, Math.abs(hx - cx) + Math.abs(hy - cy));
+    for (let j = 0; j < chicken.length; j++) {
+      // 한 집 당 치킨집까지의 거리
+      // 그 치킨집은 check에서 true여야 한다
+      if (check[j]) {
+        min = Math.min(
+          min,
+          Math.abs(houses[i][0] - chicken[j][0]) +
+            Math.abs(houses[i][1] - chicken[j][1])
+        );
       }
-    });
-    sum += min;
-  });
-  return sum;
+    }
+    distance += min;
+  }
+  // 도시의 치킨 거리 리턴
+  return distance;
 }
 
 // 백트래킹을 수행하는 함수
 function backtracking(idx, cnt) {
-  // 치킨집을 M개 폐업했을 때 = backtracking의 base case
   if (cnt === M) {
-    // 각 집에서의 치킨 거리를 세보고
-    // 가장 작으면 그걸 최솟값으로 update
-    if (minDistance() < answer) answer = minDistance();
-    return;
+    if (chickenDistance() < min) min = chickenDistance();
   } else {
     for (let i = idx; i < chicken.length; i++) {
       if (check[i]) continue;
@@ -55,4 +58,5 @@ function backtracking(idx, cnt) {
 }
 
 backtracking(0, 0);
-console.log(answer);
+// 최종 답안 출력
+console.log(min);
