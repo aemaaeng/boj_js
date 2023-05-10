@@ -16,4 +16,5 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+// console.log(D);
 console.log(D[N - 1][M - 1]);
