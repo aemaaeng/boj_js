@@ -7,10 +7,11 @@ const [N, K] = input[0].split(" ").map(Number);
 const w = new Array(N + 1).fill(0);
 const v = new Array(N + 1).fill(0);
 
-for (let i = 1; i <= N; i++) {
-  w[i] = +input[i].split(" ")[0];
-  v[i] = +input[i].split(" ")[1];
-}
+input.slice(1).forEach((el, idx) => {
+  const [weight, value] = el.split(" ");
+  w[idx + 1] = +weight;
+  v[idx + 1] = +value;
+});
 
 const D = Array.from(new Array(N + 1), () => new Array(K + 1).fill(0));
 
@@ -24,4 +25,5 @@ for (let i = 1; i <= N; i++) {
   }
 }
 
+// console.log(D);
 console.log(D[N][K]);
