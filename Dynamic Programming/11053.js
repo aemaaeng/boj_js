@@ -6,7 +6,7 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 const N = Number(input[0]);
 const A = input[1].split(" ").map((el) => Number(el));
 
-const D = new Array(N).fill(0);
+const D = new Array(N).fill(0); // 부분수열의 길이를 담는 배열
 
 for (let i = 0; i < N; i++) {
   let max = 0;
@@ -18,4 +18,5 @@ for (let i = 0; i < N; i++) {
   D[i] = max + 1;
 }
 
+// console.log(D);
 console.log(Math.max(...D));
