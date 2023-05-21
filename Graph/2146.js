@@ -6,7 +6,7 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 const N = Number(input.shift());
 const field = input.map((el) => el.split(" ").map(Number));
 
-// -1로 만들기
+// 섬들을 우선 -1로 만든다
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
     if (field[i][j] === 1) field[i][j] = -1;
@@ -17,34 +17,37 @@ let visitedCoords = {};
 const dx = [-1, 1, 0, 0];
 const dy = [0, 0, -1, 1];
 
-// 섬별 라벨 붙이기
-function label_island(a, b, l) {
+// 섬별로 구별짓는 번호를 붙인다 (bfs)
+function byIsland(a, b, number) {
   const queue = [[a, b]];
   visitedCoords[[a, b]] = true;
-  field[a][b] = l;
+  field[a][b] = number;
 
   while (queue.length) {
     const [x, y] = queue.shift();
     for (let i = 0; i < 4; i++) {
-      let nx = x + dx[i];
-      let ny = y + dy[i];
+      let nx = dx[i] + x;
+      let ny = dy[i] + y;
 
       if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
 
+      // 방문하지 않았고 필드의 숫자가 -1이라면 인자로 들어온 번호를 붙인다
       if (!visitedCoords[[nx, ny]] && field[nx][ny] === -1) {
         visitedCoords[[nx, ny]] = true;
-        field[nx][ny] = l;
+        field[nx][ny] = number;
+        // 이 좌표를 queue에 넣어 이 지점부터 주변 땅을 또 탐색하여 번호를 매긴다
         queue.push([nx, ny]);
       }
     }
   }
 }
 
-// 다리 만드는 bfs - 매개변수 num
-// 같은 대륙에 있는 모든 땅을 queue에 넣고 시작한다.
-function bfs(num) {
+// 다리 만드는 bfs - 다리 개수 리턴
+// 인자로 섬의 번호를 받는다
+function bridge_bfs(num) {
   let res = 0;
   const queue = [];
+  // 같은 섬은 모두 방문처리 후 queue에 넣고 시작한다
   for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {
       if (field[i][j] === num) {
@@ -54,21 +57,21 @@ function bfs(num) {
     }
   }
 
-  // 서로 다른 곳의 다리를 연결한다
+  // 서로 다른 대륙의 다리를 연결해본다
   while (queue.length) {
-    let S = queue.length;
-    for (let i = 0; i < S; i++) {
+    let L = queue.length;
+    for (let i = 0; i < L; i++) {
       const [x, y] = queue.shift();
 
       for (let j = 0; j < 4; j++) {
-        let nx = x + dx[j];
-        let ny = y + dy[j];
+        let nx = dx[j] + x;
+        let ny = dy[j] + y;
 
         if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
 
-        if (field[nx][ny] !== 0 && field[nx][ny] !== num) {
-          return res;
-        } else if (field[nx][ny] === 0 && !visitedCoords[[nx, ny]]) {
+        // 바다가 아니고 현재 섬도 아닐 때 -> 다른 섬이므로 다리의 길이 리턴
+        if (field[nx][ny] !== 0 && field[nx][ny] !== num) return res;
+        else if (field[nx][ny] === 0 && !visitedCoords[[nx, ny]]) {
           visitedCoords[[nx, ny]] = true;
           queue.push([nx, ny]);
         }
@@ -78,21 +81,21 @@ function bfs(num) {
   }
 }
 
-let land_label = 1;
+// byIsland 함수를 실행해 섬에 번호를 매긴다
+let island_number = 1;
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
     if (!visitedCoords[[i, j]] && field[i][j] !== 0) {
-      label_island(i, j, land_label);
-      land_label += 1;
+      byIsland(i, j, island_number);
+      island_number += 1;
     }
   }
 }
 
+// bfs를 실행한다
 let answer = Infinity;
-
-// 섬의 개수만큼 다리 만드는 bfs 돌리기
-for (let i = 1; i < land_label; i++) {
-  answer = Math.min(answer, bfs(i));
+for (let i = 1; i < island_number; i++) {
+  answer = Math.min(answer, bridge_bfs(i));
   visitedCoords = {};
 }
 
