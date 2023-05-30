@@ -6,36 +6,34 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 const N = +input[0];
 const arr = input[1].split(" ").map(Number);
 
-// 합 연산 수행 함수
-function sum(arr) {
-  let answer = 0;
-  for (let i = 0; i < arr.length - 1; i++) {
-    answer += Math.abs(arr[i] - arr[i + 1]);
+function add(arr) {
+  let sum = 0;
+  for (let i = 2; i <= arr.length; i++) {
+    sum += Math.abs(arr[i - 2] - arr[i - 1]);
   }
-  return answer;
+  return sum;
 }
 
-const visited = new Array(N + 1).fill(false);
-// 임시 배열을 하나 만들어서 거기에 백트래킹의 결과 배열을 담는다!
-let tmp = [];
 let max = 0;
+let temp = []; // 백트래킹의 결과를 담는 배열
 
-function dfs(cnt) {
-  if (N === cnt) {
-    // base case
-    if (max < sum(tmp)) max = sum(tmp);
+const visited = new Array(N + 1).fill(false);
+
+// N만큼 재귀를 돌았을 때 합 연산 결과가 max값보다 크면 update
+function backtracking(cnt) {
+  if (cnt === N) {
+    if (max < add(temp)) max = add(temp);
   } else {
-    // 백트래킹 -> 방문처리 후 dfs를 수행하고 방문처리 해제
     for (let i = 0; i < N; i++) {
       if (visited[i]) continue;
       visited[i] = true;
-      tmp.push(arr[i]);
-      dfs(cnt + 1);
-      tmp.pop();
+      temp.push(arr[i]);
+      backtracking(cnt + 1);
+      temp.pop(arr[i]);
       visited[i] = false;
     }
   }
 }
 
-dfs(0);
+backtracking(0);
 console.log(max);
