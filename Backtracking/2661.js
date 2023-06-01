@@ -1,13 +1,19 @@
+// 좋은수열
 const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let N = Number(fs.readFileSync(filePath).toString().trim());
 
-let isDone = false;
+// 숫자를 하나씩 넣어보고
+// 그 수가 좋은 수열의 조건에 해당하면 재귀함수를 실행한다
+// 문제에서 요구하는 것은 가장 **작은** 좋은수열
+// 따라서 가장 처음에 나타나는 좋은수열에서 함수를 바로 종료한다 (isDone 변수 이용)
+// for문에서 1부터 3까지 순차적으로 돌면서 넣어보기 때문
 
-function isGoodSequence(str) {
+function isGood(str) {
+  // return boolean
   const L = str.length;
-  const half = Math.floor(L / 2);
-  for (let i = 1; i <= half; i++) {
+  const mid = Math.floor(L / 2);
+  for (let i = 1; i <= mid; i++) {
     const A = L;
     const B = L - i;
     const C = L - i * 2;
@@ -16,9 +22,8 @@ function isGoodSequence(str) {
   return true;
 }
 
-// 가장 작은 좋은 수열은 맨 처음에 발견된 좋은 수열이다.
-// 반복문에서 1, 2, 3이 순차적으로 들어가고 있기 때문이다.
-// 따라서 처음에 좋은 수열이 발견되었을 때 isDone을 true로 바꾸고 함수를 종료한다.
+let isDone = false;
+
 function backtracking(str) {
   if (isDone) return;
 
@@ -27,14 +32,10 @@ function backtracking(str) {
     isDone = true;
     return;
   }
-
   for (let i = 1; i <= 3; i++) {
     let temp = str + `${i}`;
-    if (temp.length <= N && isGoodSequence(temp)) backtracking(temp);
+    if (isGood(temp) && temp.length <= N) backtracking(temp);
   }
 }
 
 backtracking("1");
-
-// 123321은 중간에 3이 두 번 나오니까 좋은 수열이 아닐 거라고 생각했는데 true가 뜬다. 왜지
-// console.log(isGoodSequence("123321")); -> true
