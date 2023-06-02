@@ -8,8 +8,14 @@ const A = input[1].split(" ").map(Number);
 // 연산자
 const operator = input[2].split(" ").map(Number);
 
-// 계산을 수행해주는 obj
-const calcObj = {
+// 최댓값과 최솟값
+let min = Infinity;
+let max = Number.MIN_SAFE_INTEGER;
+
+const temp = [];
+
+// +, -, x, /
+const calc = {
   0: (num1, num2) => num1 + num2,
   1: (num1, num2) => num1 - num2,
   2: (num1, num2) => num1 * num2,
@@ -18,24 +24,16 @@ const calcObj = {
   },
 };
 
-let min = Infinity;
-let max = Number.MIN_SAFE_INTEGER; // 최댓값이 음수일 수도 있음
-const temp = []; // 연산자의 인덱스가 들어가는 배열
-
-// 종료 조건: cnt가 N - 1과 같아질 때
 function backtracking(cnt) {
+  // cnt가 N - 1이 될 때 계산 수행 후 최댓값, 최솟값과 비교
   if (cnt === N - 1) {
-    // temp 배열에서 반복문을 돌며 계산 수행
-    // 결과에 따라 max, min update
-    // return
     let num1 = A[0];
     for (let i = 0; i < temp.length; i++) {
       let idx = temp[i];
-      num1 = calcObj[idx](num1, A[i + 1]);
+      num1 = calc[idx](num1, A[i + 1]);
     }
-    // 값 update는 for loop 바깥에서
-    if (num1 < min) min = num1;
     if (max < num1) max = num1;
+    if (num1 < min) min = num1;
   }
 
   for (let i = 0; i < 4; i++) {
@@ -49,9 +47,4 @@ function backtracking(cnt) {
 }
 
 backtracking(0);
-
 console.log(`${max}\n${min}`);
-
-// 아래처럼 하면 1퍼센트에서 바로 오답처리가 된다. 최댓값과 최솟값을 템플릿 문자열을 이용해 한 줄로 출력해야 한다..
-// console.log(max);
-// console.log(min);
