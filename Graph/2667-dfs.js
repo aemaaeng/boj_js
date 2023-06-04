@@ -4,44 +4,40 @@ const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
 const N = Number(input.shift());
-const map = input.map((el) => el.split("").map(Number));
+const field = input.map((el) => el.split("").map(Number));
 
-let visited = Array.from(Array(N + 1), () => new Array(N + 1).fill(0));
+const visitedCoords = {};
+const visited = Array.from(new Array(N + 1), () =>
+  new Array(N + 1).fill(false)
+);
 
 let cnt = 0;
-let dx = [0, 0, -1, 1];
-let dy = [-1, 1, 0, 0];
+
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
 
 function dfs(x, y) {
   if (visited[x][y]) return;
-  visited[x][y] = 1;
-  visitedCoords[[x, y]] = 1;
-  cnt++;
+  visited[x][y] = true;
+  visitedCoords[[x, y]] = true;
+  cnt += 1;
 
+  // 상하좌우 탐색
   for (let i = 0; i < 4; i++) {
-    let nx = x + dx[i];
-    let ny = y + dy[i];
+    const nx = x + dx[i];
+    const ny = y + dy[i];
 
-    if (
-      nx >= 0 &&
-      ny >= 0 &&
-      nx < N &&
-      ny < N &&
-      !visited[nx][ny] &&
-      map[nx][ny] === 1
-    ) {
-      dfs(nx, ny);
-    }
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+    if (!visited[nx][ny] && field[nx][ny] === 1) dfs(nx, ny);
   }
 
   return cnt;
 }
 
-const visitedCoords = {};
 const answer = [];
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
-    if (map[i][j] === 1 && !visitedCoords[[i, j]]) {
+    if (!visitedCoords[[i, j]] && field[i][j] === 1) {
       answer.push(dfs(i, j));
       cnt = 0;
     }
