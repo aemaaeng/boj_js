@@ -1,4 +1,4 @@
-// 미로 탐색
+// 미로찾기
 const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
@@ -6,31 +6,29 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 const [N, M] = input[0].split(" ").map(Number);
 const maze = input.slice(1).map((el) => el.split("").map(Number));
 
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
+
 function bfs(x, y) {
+  // 주변이 1일 때마다 maze의 그 값을 현재 값에 1을 더한 것으로 update
+  // console.log(maze[N - 1][M - 1])
   const queue = [[x, y]];
-  const result = [];
-  const visited = {};
-  visited[[x, y]] = 1;
-  const dx = [0, 0, -1, 1];
-  const dy = [-1, 1, 0, 0];
   while (queue.length) {
-    let coord = queue.shift();
-    result.push(coord);
+    const [cx, cy] = queue.shift();
     for (let i = 0; i < 4; i++) {
-      const nx = coord[0] + dx[i];
-      const ny = coord[1] + dy[i];
+      const nx = dx[i] + cx;
+      const ny = dy[i] + cy;
 
-      // 정해진 범위에 벗어나는지 확인하기
+      // 범위 벗어나면 제외
       if (nx < 0 || ny < 0 || nx >= N || ny >= M) continue;
-
-      if (!visited[[nx, ny]] && maze[nx][ny] === 1) {
-        // 방문하지 않은 곳이고 1이면 queue에 넣기
-        visited[[nx, ny]] = visited[coord] + 1;
+      if (maze[nx][ny] === 1) {
         queue.push([nx, ny]);
+        maze[nx][ny] = maze[cx][cy] + 1;
       }
     }
   }
-  return visited[[N - 1, M - 1]];
+
+  return maze[N - 1][M - 1];
 }
 
 console.log(bfs(0, 0));
