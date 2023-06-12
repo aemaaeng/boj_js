@@ -1,4 +1,3 @@
-// 아기 상어
 const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
@@ -6,114 +5,106 @@ let input = fs.readFileSync(filePath).toString().trim().split("\n");
 const N = Number(input.shift());
 const space = input.map((el) => el.split(" ").map(Number));
 
+const sharkPos = [];
 let size = 2;
-let a, b;
-let fish = [];
 
-// 아기상어의 위치 저장, 9를 0으로 초기화
+// 아기상어의 좌표 저장하기, 9를 0으로 바꾸기
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
     if (space[i][j] === 9) {
-      a = i;
-      b = j;
       space[i][j] = 0;
+      sharkPos.push(i);
+      sharkPos.push(j);
     }
   }
 }
 
-// 먹을 수 있는 물고기의 위치를 탐색하는 bfs
+// 상, 좌, 우, 하
+const dx = [-1, 0, 0, 1];
+const dy = [0, -1, 1, 0];
+
+// 먹을 수 있는 물고기들을 저장하는 배열
+let fish = [];
+
 function bfs(x, y) {
   const visited = Array.from(new Array(N + 1), () =>
     new Array(N + 1).fill(false)
   );
-  const queue = [];
-  queue.push([x, y, 0]);
-  const offset = [
-    [-1, 0],
-    [0, -1],
-    [0, 1],
-    [1, 0],
-  ];
+  const queue = [[x, y, 0]];
   fish = [];
 
   while (queue.length) {
-    for (let i = 0; i < queue.length; i++) {
-      let temp = queue.shift();
+    const [a, b, d] = queue.shift();
+    for (let i = 0; i < 4; i++) {
+      let nx = a + dx[i];
+      let ny = b + dy[i];
+      let distance = d + 1;
 
-      for (let j = 0; j < 4; j++) {
-        let nx = temp[0] + offset[j][0];
-        let ny = temp[1] + offset[j][1];
-        let distance = temp[2] + 1;
-
-        if (nx >= 0 && ny >= 0 && nx < N && ny < N) {
-          if (!visited[nx][ny] && space[nx][ny] <= size) {
-            // 상어가 먹을 수 있는 물고기
-            if (size > space[nx][ny] && space[nx][ny] !== 0) {
-              // 물고기 배열에 추가
-              fish.push({ x: nx, y: ny, distance });
-            }
-            // 방문처리하고 큐에 추가
-            visited[nx][ny] = true;
-            queue.push([nx, ny, distance]);
-          }
+      if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
+      if (space[nx][ny] <= size && !visited[nx][ny]) {
+        // 사이즈가 작으면 잡아먹는다
+        if (space[nx][ny] < size && space[nx][ny] !== 0) {
+          fish.push([nx, ny, distance]);
         }
+        visited[nx][ny] = true;
+        // console.log(nx, ny, distance);
+        queue.push([nx, ny, distance]);
       }
     }
   }
 }
 
-bfs(a, b);
+const [sharkPosX, sharkPosY] = sharkPos;
+bfs(sharkPosX, sharkPosY);
 
 let ate = 0;
 let sec = 0;
 
+// 잡아먹을 수 있는 물고기가 하나일 때
+// 잡아먹을 수 있는 물고기가 여러 마리일 때 나눠서
 while (fish.length) {
   if (fish.length === 1) {
-    // 잡아먹고 위치 저장
-    a = fish[0].x;
-    b = fish[0].y;
-    space[a][b] = 0;
+    const [x, y, distance] = fish.shift();
+    space[x][y] = 0;
     ate += 1;
-    if (size === ate) {
+    if (ate === size) {
       size += 1;
       ate = 0;
     }
-    sec += fish[0].distance;
-    fish.shift();
-    bfs(a, b);
+    sec += distance;
+    bfs(x, y);
   } else if (fish.length >= 2) {
-    // fish 배열을 거리순으로 정렬
     fish.sort((a, b) => {
-      let A = a.distance;
-      let B = b.distance;
+      let A = a[2];
+      let B = b[2];
       if (A < B) return -1;
       else if (A > B) return 1;
       else {
-        A = a.x;
-        B = b.x;
+        // 거리가 같으면 x축끼리 비교 시작 (위쪽 우선)
+        // 위에 있는 물고기 먼저
+        A = a[0];
+        B = b[0];
         if (A < B) return -1;
         else if (A > B) return 1;
         else {
-          A = a.y;
-          B = b.y;
+          // 그래도 같으면 y축끼리 비교 (왼쪽 우선)
+          A = a[1];
+          B = b[1];
           if (A < B) return -1;
           else if (A > B) return 1;
           else return 0;
         }
       }
     });
-    a = fish[0].x;
-    b = fish[0].y;
-    space[a][b] = 0;
+    const [x, y, distance] = fish.shift();
+    space[x][y] = 0;
     ate += 1;
-    // 사이즈 업데이트
     if (size === ate) {
       size += 1;
       ate = 0;
     }
-    sec += fish[0].distance;
-    fish.shift();
-    bfs(a, b);
+    sec += distance;
+    bfs(x, y);
   }
 }
 
