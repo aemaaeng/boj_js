@@ -12,23 +12,23 @@ const dx = [0, 0, -1, 1];
 const dy = [-1, 1, 0, 0];
 let max = 0;
 
-// dfs
-function dfs(x, y, cnt) {
+function backtracking(x, y, cnt) {
   if (max < cnt) max = cnt;
+  alpha[board[x][y].charCodeAt() - 65] = true;
 
   for (let i = 0; i < 4; i++) {
-    const nx = x + dx[i];
-    const ny = y + dy[i];
+    const nx = dx[i] + x;
+    const ny = dy[i] + y;
 
     if (nx < 0 || ny < 0 || nx >= R || ny >= C) continue;
+
     if (!alpha[board[nx][ny].charCodeAt() - 65]) {
       alpha[board[nx][ny].charCodeAt() - 65] = true;
-      dfs(nx, ny, cnt + 1);
+      backtracking(nx, ny, cnt + 1);
       alpha[board[nx][ny].charCodeAt() - 65] = false;
     }
   }
 }
 
-alpha[board[0][0].charCodeAt() - 65] = true;
-dfs(0, 0, 1);
+backtracking(0, 0, 1);
 console.log(max);
