@@ -4,8 +4,7 @@ const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
 
 const [N, K] = input[0].split(" ").map(Number);
-// 오름차순으로 정렬, 중복 제거
-const coins = [
+const A = [
   ...new Set(
     input
       .slice(1)
@@ -14,12 +13,14 @@ const coins = [
   ),
 ];
 
+// D[i] = i원을 만들 때 사용하는 동전의 최소 개수
 const D = new Array(K + 1).fill(Infinity);
+
 D[0] = 0;
 
 for (let i = 0; i < N; i++) {
-  for (let j = coins[i]; j <= K; j++) {
-    D[j] = Math.min(D[j], D[j - coins[i]] + 1);
+  for (let j = A[i]; j <= K; j++) {
+    D[j] = Math.min(D[j], D[j - A[i]] + 1);
   }
 }
 
