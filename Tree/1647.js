@@ -1,35 +1,4 @@
 // 도시 분할 계획
-class UnionFind {
-  constructor(size) {
-    this.parent = new Array(size).fill(null).map((_, idx) => idx);
-    this.rank = new Array(size).fill(0);
-  }
-
-  find(x) {
-    if (this.parent[x] !== x) {
-      this.parent[x] = this.find(this.parent[x]);
-    }
-    return this.parent[x];
-  }
-
-  union(x, y) {
-    const rootX = this.find(x);
-    const rootY = this.find(y);
-    if (rootX === rootY) return false;
-
-    if (this.rank[rootX] < this.rank[rootY]) {
-      this.parent[rootX] = rootY;
-    } else if (this.rank[rootX] > this.rank[rootY]) {
-      this.parent[rootY] = rootX;
-    } else {
-      this.parent[rootY] = rootX;
-      this.rank[rootX]++;
-    }
-
-    return true;
-  }
-}
-
 const fs = require("fs");
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./test.txt";
 let input = fs.readFileSync(filePath).toString().trim().split("\n");
@@ -46,24 +15,33 @@ for (const [a, b, weight] of input) {
 
 graph.sort((a, b) => a.weight - b.weight);
 
-function kruskal(graph) {
-  const numNodes = N;
-  const mst = [];
-  const unionFind = new UnionFind(numNodes + 1);
-
-  for (const edge of graph) {
-    if (unionFind.union(edge.a, edge.b)) {
-      mst.push(edge);
-      if (mst.length === numNodes - 1) break;
-    }
-  }
-
-  return mst;
+function find_parent(parent, x) {
+  if (parent[x] !== x) parent[x] = find_parent(parent, parent[x]);
+  return parent[x];
 }
 
-const mst = kruskal(graph);
-mst.sort((a, b) => a.weight - b.weight);
-mst.pop();
-let sum = 0;
-mst.forEach((el) => (sum += el.weight));
-console.log(sum);
+function union_parents(parent, a, b) {
+  const rootA = find_parent(parent, a);
+  const rootB = find_parent(parent, b);
+  if (rootA < rootB) parent[rootB] = rootA;
+  else parent[rootA] = rootB;
+}
+
+const parent = new Array(N + 1).fill(0);
+let answer = 0;
+
+for (let i = 1; i < N + 1; i++) {
+  parent[i] = i;
+}
+
+let max = 0;
+for (const { a, b, weight } of graph) {
+  if (find_parent(parent, a) !== find_parent(parent, b)) {
+    union_parents(parent, a, b);
+    max = Math.max(max, weight);
+    answer += weight;
+  }
+}
+
+answer -= max;
+console.log(answer);
